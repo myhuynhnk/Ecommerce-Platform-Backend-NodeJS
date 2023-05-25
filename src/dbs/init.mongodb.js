@@ -1,9 +1,10 @@
 "use strict"
-
 const mongoose = require('mongoose');
 const { countConnection } = require('../helpers/check.connect');
+const { db: {host, port, name} } = require('../configs/db.configs');
 
-const connectStr = 'mongodb://localhost:27017/storeDEV';
+const connectStr = `mongodb://${host}:${port}/${name}`;
+console.log(`Connect String::${connectStr}`);
 
 //using singleton pattern to create only instance connect to DB
 class Database {
