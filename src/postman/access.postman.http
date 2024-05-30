@@ -3,10 +3,21 @@
 ### signup
 POST {{url_dev}}/shop/signup
 Content-Type: application/json
-x-api-key: 5e39acef8ce7cafa0697f6d02cb7a068bccc9ecfa9ebfae4ce4b3b21e9ac9c2645ccedb58208405cf9d3661383fa01fc631cac7e967178d4376e049aa01acbd9
+x-api-key: 414c3f688eabc3c373a7c0841cf3954a24e282f8a86cbb112756dcc355b588c24bc7a1a1d806c065408cdccb36953760de33518330fc73586d1765a36a50d3ec
 
 {
     "name": "SHOP TIPS",
     "email": "shoptips@gmail.com",
+    "password": "abc123"
+}
+
+
+### login
+POST {{url_dev}}/shop/login
+Content-Type: application/json
+x-api-key: 414c3f688eabc3c373a7c0841cf3954a24e282f8a86cbb112756dcc355b588c24bc7a1a1d806c065408cdccb36953760de33518330fc73586d1765a36a50d3ec
+
+{
+    "email": "shoptips01@gmail.com",
     "password": "abc123"
 }
