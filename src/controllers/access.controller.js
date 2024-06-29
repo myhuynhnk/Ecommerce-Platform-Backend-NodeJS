@@ -10,6 +10,13 @@ class AccessController {
         }).send(res);
     }
 
+    logout = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: 'Logout Success!',
+            metadata: await AccessService.logout(req.keyStore),
+        }).send(res);
+    }
+
     signUp = async ( req, res, next ) => {
         // try {
         //     console.log(`[P]::signUp:: ${req.body}`);
