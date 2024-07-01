@@ -4,9 +4,9 @@ const shopModel = require('../models/shop.model');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const KeyTokenService = require('./keyToken.service');
-const { createTokenPair } = require('../auth/authUtils');
+const { createTokenPair, verifyJWT } = require('../auth/authUtils');
 const { getInfoData } = require('../utils');
-const { ConflictRequestError, BadRequestError, AuthFailureError } = require('../core/error.response');
+const { ConflictRequestError, BadRequestError, AuthFailureError, ForbiddenError } = require('../core/error.response');
 const { findByEmail } = require('./shop.service');
 
 const RoleShop = {
@@ -17,6 +17,53 @@ const RoleShop = {
 }
 
 class AccessService {
+    /*
+        check this token used
+    */
+    static handlerRefreshToken = async ( refreshToken ) => {
+        // check whether this token has been used yet?
+        const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+        console.log('foundToken:::', foundToken);
+        // if find out 
+        if(foundToken) {
+            // decode to check if it is in the system? get payload JSONwebtoken
+            const { userId, email } = await verifyJWT(refreshToken, foundToken.privateKey);
+            console.log('Payload Verified:::', {userId, email});
+            // delete tokens in keyStore
+            await KeyTokenService.deleteKeyById(userId);
+            throw new ForbiddenError('Something went wrong happened!! Please re-login.');
+        }
+        
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+        console.log('holderToken:::', holderToken);
+        if(!holderToken) throw new AuthFailureError(' Shop not registered ');
+        const { userId, email } = await verifyJWT(refreshToken, holderToken.privateKey);
+        console.log('Payload Tokens is being used:::', {userId, email});
+
+        // check shop by userId(ShopID)
+        const foundShop = await findByEmail({ email });
+        console.log('foundShop:::', foundShop);
+        if(!foundShop) throw new AuthFailureError(' Shop not registered with email: ', email);
+
+        // create a new tokens pair
+        const tokens = await createTokenPair({userId, email}, holderToken.publicKey, holderToken.privateKey);
+        //update tokens to keyStore
+        await holderToken.updateOne({
+            $set: {
+                refreshToken: tokens.refreshToken
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        });
+
+        return {
+            user: {userId, email},
+            tokens
+        }
+    }
+
+
     /*
         1. check email is in db
         2. match password

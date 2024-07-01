@@ -17,6 +17,13 @@ class AccessController {
         }).send(res);
     }
 
+    handlerRefreshToken = async ( req, res, next ) => {
+        new SuccessResponse({
+            message: 'Get Tokens Success!',
+            metadata: await AccessService.handlerRefreshToken(req.body.refreshToken),
+        }).send(res);
+    }
+
     signUp = async ( req, res, next ) => {
         // try {
         //     console.log(`[P]::signUp:: ${req.body}`);
@@ -34,6 +41,8 @@ class AccessController {
         }).send(res);
         // return res.status(201).json( await AccessService.signUp(req.body));
     }
+
+   
 }
 
 module.exports = new AccessController();
